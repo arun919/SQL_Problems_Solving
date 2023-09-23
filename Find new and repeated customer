@@ -1,0 +1,42 @@
+Find new and repeated customer
+
+
+########################################### Problem  Statement ################################################
+# Fidnd the customer who are new and repeatedly order
+# 
+###############################################################################################################
+
+Input :
+create table customer_orders (
+order_id integer,
+customer_id integer,
+order_date date,
+order_amount integer
+);
+
+select * from customer_orders
+
+insert into customer_orders values(1,100,cast('2022-01-01' as date),2000),(2,200,cast('2022-01-01' as date),2500),(3,300,cast('2022-01-01' as date),2100)
+,(4,100,cast('2022-01-02' as date),2000),(5,400,cast('2022-01-02' as date),2200),(6,500,cast('2022-01-02' as date),2700)
+,(7,100,cast('2022-01-03' as date),3000),(8,400,cast('2022-01-03' as date),1000),(9,600,cast('2022-01-03' as date),3000)
+;
+
+Solution:
+# Step1 : find the customer first order and  create
+# step2 : join with orginal table if first order date match btw two tables for each customer market 1 else 0
+# step3 : apply aggregate to find repeated customer
+
+with customer_first as (
+select customer_id,min(order_date) as first_order_date
+from customer_orders
+group by customer_id )
+
+
+select 
+  a.order_date,
+  sum(case when a.order_date = b.first_order_date then 1 else 0  end ) as first_order,
+  sum(case when a.order_date != b.first_order_date then 1 else 0 end )  as repeated_order
+from customer_orders a inner join customer_first b
+on a.customer_id = b.customer_id
+group by order_date
+order by order_date
