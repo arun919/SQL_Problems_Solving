@@ -1,0 +1,49 @@
+Report for Visitors List
+
+
+####################################### Problem Statement #############################################
+# A comany wants to find the loop whole in the vistirs list
+# In genaral, company will allow  a person only once in a day into the premises. But Its possible the same 
+# person able to enter the premises with different email ID
+# So we nee to find peopel who visited more than once, floor and resource they accessed
+##########################################################################################################
+
+Input :
+
+create table entries ( 
+name varchar(20),
+address varchar(20),
+email varchar(20),
+floor int,
+resources varchar(10));
+
+insert into entries 
+values ('A','Bangalore','A@gmail.com',1,'CPU'),('A','Bangalore','A1@gmail.com',1,'CPU'),('A','Bangalore','A2@gmail.com',2,'DESKTOP')
+,('B','Bangalore','B@gmail.com',2,'DESKTOP'),('B','Bangalore','B1@gmail.com',2,'DESKTOP'),('B','Bangalore','B2@gmail.com',1,'MONITOR')
+
+
+Solution:
+
+# calulate total visit and resource used
+with 
+entry_cnt as (select NAME,count(1) as total_visit,string_agg(resources,',') as resources_used
+from entries 
+group by name
+)
+
+select a.name,b.total_visit,a.most_visited_floor,b.resources_used
+from 
+( select 
+NAME,most_visited_floor,rank_visited_floor
+from
+(
+# calculate most visited floor
+select NAME,
+       floor as most_visited_floor,
+       dense_rank() over (partition by name order by count(1) desc) as rank_visited_floor
+from entries 
+group by name,floor 
+) test  
+where  rank_visited_floor = 1
+) a
+inner join entry_cnt b on a.name = b.name
