@@ -1,0 +1,63 @@
+Friends Analysis
+
+########################################## Problem Statemen #####################################################
+# Find the peopel who have friends more than 100 marks
+#################################################################################################################
+
+
+Input:
+
+create table person
+(
+person_id int,
+name varchar(100),
+score int
+)
+
+select * from person;
+insert into person
+values (1,'alice',88),
+(2,'bob',11),
+(3,'davice',27),
+(4,'tara',45),
+(5,'john',63);
+
+-- create and insert friend table
+create table friend
+(
+personid int,
+friendid int
+)
+
+insert into friend
+values (1,2),
+(1,3),
+(2,1),
+(2,3),
+(3,5),
+(4,2),
+(4,3),
+(4,5);
+select * from  friend;
+
+
+
+Solution:
+
+select n.personid
+       ,n.total_friend
+       ,n.tot_score
+       ,p.name
+from
+(
+(select a.personid
+       --,b.score
+       --,b.name
+       --,a.personid
+       ,count(b.person_id) as total_friend
+       ,sum(b.score) as tot_score
+from friend a inner join person b
+on a.friendid = b.person_id --and a.person_id != b.personid
+group by a.personid
+having sum(b.score) > 100) n inner join person p
+on n.personid = p.person_id );
